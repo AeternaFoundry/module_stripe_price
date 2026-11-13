@@ -125,5 +125,61 @@ EOT
       up_to               = string
     })))
   }))
+  validation {
+    condition = alltrue([
+      for k, v in var.prices : (
+        v.billing_scheme == null || (contains(["per_unit", "tiered"], v.billing_scheme))
+      )
+    ])
+    error_message = "must be one of: \"per_unit\", \"tiered\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.prices : (
+        v.tax_behavior == null || (contains(["exclusive", "inclusive", "unspecified"], v.tax_behavior))
+      )
+    ])
+    error_message = "must be one of: \"exclusive\", \"inclusive\", \"unspecified\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.prices : (
+        v.tiers_mode == null || (contains(["graduated", "volume"], v.tiers_mode))
+      )
+    ])
+    error_message = "must be one of: \"graduated\", \"volume\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.prices : (
+        v.transform_quantity == null || (contains(["down", "up"], v.transform_quantity.round))
+      )
+    ])
+    error_message = "must be one of: \"down\", \"up\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.prices : (
+        v.currency_options == null || alltrue([for item in v.currency_options : (item.tax_behavior == null || (contains(["exclusive", "inclusive", "unspecified"], item.tax_behavior)))])
+      )
+    ])
+    error_message = "must be one of: \"exclusive\", \"inclusive\", \"unspecified\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.prices : (
+        v.recurring == null || alltrue([for item in v.recurring : (contains(["day", "month", "week", "year"], item.interval))])
+      )
+    ])
+    error_message = "must be one of: \"day\", \"month\", \"week\", \"year\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.prices : (
+        v.recurring == null || alltrue([for item in v.recurring : (item.usage_type == null || (contains(["licensed", "metered"], item.usage_type)))])
+      )
+    ])
+    error_message = "must be one of: \"licensed\", \"metered\""
+  }
 }
 
